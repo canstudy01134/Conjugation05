@@ -191,7 +191,7 @@
     function speak(text, callback) {
         const msg = new SpeechSynthesisUtterance(text);
         msg.lang = 'en-US';
-        msg.rate = 0.77; // 読み上げ速度
+        msg.rate = 0.73; // 読み上げ速度
         msg.onend = callback;
         speechSynthesis.speak(msg);
     }
