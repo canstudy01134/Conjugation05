@@ -195,18 +195,27 @@
         msg.onend = callback;
         speechSynthesis.speak(msg);
     }
+// --- 中略 (wordDataなどはそのまま) ---
 
     async function speakTriple(v1, v2, v3, callback) {
         speechSynthesis.cancel();
+        const innerDelay = 600; // ★ここで単語間の待ち時間を調整（0.6秒）
+
         await new Promise(r => speak(v1, r));
+        await new Promise(r => setTimeout(r, innerDelay)); // 間の待ち時間
+        
         await new Promise(r => speak(v2, r));
+        await new Promise(r => setTimeout(r, innerDelay)); // 間の待ち時間
+        
         await new Promise(r => speak(v3, r));
+        
         if(callback) callback();
     }
 
     async function playGroup(startIndex, count) {
         if (isAutoPlaying) { stopAutoPlay(); return; }
         isAutoPlaying = true;
+        
         const btn = document.getElementById(`btn-play-${startIndex}`);
         btn.classList.add('playing');
         btn.innerText = "■ 停止";
@@ -216,30 +225,27 @@
 
         for (let i = startIndex; i < startIndex + count; i++) {
             if (!isAutoPlaying || !wordData[startIdx + i]) break;
+            
+            // ハイライト処理
             document.querySelectorAll('.word-row').forEach(r => r.classList.remove('highlight'));
             const currentRow = document.getElementById(`row-${i}`);
-            if (currentRow) currentRow.classList.add('highlight');
+            if (currentRow) {
+                currentRow.classList.add('highlight');
+                currentRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             
-        function speakTriple(word0, word1, word2, onEnd) {
-            const innerDelay = 600; // ★0, 1, 2の間の待ち時間（ミリ秒）。0.6秒なら600
-
-            // 1. 原形(0)を読み上げ
-            speak(word0, () => {
-            // 指定した時間待機してから次へ
-                setTimeout(() => {
-                // 2. 比較級(1)を読み上げ
-                    speak(word1, () => {
-                    // 再び待機
-                        setTimeout(() => {
-                        // 3. 最上級(2)を読み上げ
-                            speak(word2, onEnd); // 全て終わったらonEnd（res）を呼ぶ
-                        }, innerDelay);
-                    });
-                }, innerDelay);
+            // 三段階の読み上げを実行し、終わるまで待つ
+            await new Promise(res => {
+                speakTriple(wordData[startIdx + i][0], wordData[startIdx + i][1], wordData[startIdx + i][2], () => {
+                    // セットが終わった後の待ち時間
+                    setTimeout(res, interval);
+                });
             });
         }
         stopAutoPlay();
     }
+
+// --- 以下、stopAutoPlay などの続き ---
 
     function stopAutoPlay() {
         isAutoPlaying = false;
