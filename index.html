@@ -113,7 +113,7 @@
         ["exciting", "more exciting than", "the most exciting", "エキサイティング", "モア エキサイティング ザン", "ザ モスト エキサイティング", "わくわくする"],
         ["interesting", "more interesting than", "the most interesting", "インタレスティング", "モア インタレスティング ザン", "ザ モスト インタレスティング", "面白い"],
         ["important", "more important than", "the most important", "インポータント", "モア インポータント ザン", "ザ モスト インポータント", "重要である"],
-        ["useful", "more useful than", "most useful", "ユースフル", "モア ユースフル ザン", "ザ モスト ユースフル", "便利である"],
+        ["useful", "more useful than", "the most useful", "ユースフル", "モア ユースフル ザン", "ザ モスト ユースフル", "便利である"],
         ["careful", "more careful than", "the most careful", "ケアフル", "モア ケアフル ザン", "ザ モスト ケアフル", "注意深い"],
         ["well", "better than", "the best", "ウェル", "ベター ザン", "ザ ベスト", "良い(文末)"],
         ["good", "better than", "the best", "グッド", "ベター ザン", "ザ ベスト", "良い(動詞次)"],
@@ -126,6 +126,11 @@
     let currentPage = 0;
     const pageSize = 20;
     let isAutoPlaying = false;
+
+    // Silk対策：音声オブジェクトを再利用
+    const speechMsg = new SpeechSynthesisUtterance();
+    speechMsg.lang = 'en-US';
+    speechMsg.rate = 0.75;
 
     function render() {
         stopAutoPlay();
@@ -188,25 +193,29 @@
         btn.innerText = btn.classList.contains('active') ? "日本語を表示👁️" : "日本語を隠す🙈";
     }
 
+    // 単発の読み上げ用関数
     function speak(text, callback) {
-        const msg = new SpeechSynthesisUtterance(text);
-        msg.lang = 'en-US';
-        msg.rate = 0.75; // 読み上げ速度
-        msg.onend = callback;
-        speechSynthesis.speak(msg);
+        speechMsg.text = text;
+        speechMsg.onend = () => { if(callback) callback(); };
+        speechSynthesis.speak(speechMsg);
     }
 
+    // 比較級・最上級の3連発用（Silk対策の待機時間入り）
     async function speakTriple(v1, v2, v3, callback) {
         speechSynthesis.cancel();
-        const innerDelay = 500; // ここで単語間の待ち時間を調整
+        const innerDelay = 400; // 単語間の短い休み
 
-        await new Promise(r => speak(v1, r));
-        await new Promise(r => setTimeout(r, innerDelay));
+        await new Promise(r => {
+            speak(v1, () => setTimeout(r, innerDelay));
+        });
         
-        await new Promise(r => speak(v2, r));
-        await new Promise(r => setTimeout(r, innerDelay));
+        await new Promise(r => {
+            speak(v2, () => setTimeout(r, innerDelay));
+        });
         
-        await new Promise(r => speak(v3, r));
+        await new Promise(r => {
+            speak(v3, () => setTimeout(r, innerDelay));
+        });
         
         if(callback) callback();
     }
