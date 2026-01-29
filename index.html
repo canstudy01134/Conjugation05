@@ -222,7 +222,7 @@
 
             await new Promise(res => {
                 speakTriple(wordData[startIdx + i][0], wordData[startIdx + i][1], wordData[startIdx + i][2], () => {
-                    setTimeout(res, interval);
+                    setTimeout(res, 1000);
                 });
             });
         }
