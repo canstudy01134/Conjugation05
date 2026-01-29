@@ -203,7 +203,7 @@
     // 比較級・最上級の3連発用（Silk対策の待機時間入り）
     async function speakTriple(v1, v2, v3, callback) {
         speechSynthesis.cancel();
-        const innerDelay = 400; // 単語間の短い休み
+        const innerDelay = 500; // 単語間の短い休み
 
         await new Promise(r => {
             speak(v1, () => setTimeout(r, innerDelay));
