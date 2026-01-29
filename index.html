@@ -191,14 +191,14 @@
     function speak(text, callback) {
         const msg = new SpeechSynthesisUtterance(text);
         msg.lang = 'en-US';
-        msg.rate = 0.73; // 読み上げ速度
+        msg.rate = 0.75; // 読み上げ速度
         msg.onend = callback;
         speechSynthesis.speak(msg);
     }
 
     async function speakTriple(v1, v2, v3, callback) {
         speechSynthesis.cancel();
-        const innerDelay = 600; // ここで単語間の待ち時間を調整（0.6秒）
+        const innerDelay = 500; // ここで単語間の待ち時間を調整
 
         await new Promise(r => speak(v1, r));
         await new Promise(r => setTimeout(r, innerDelay));
